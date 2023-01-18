@@ -160,7 +160,7 @@ func (s *Server) handleWebsocket(w http.ResponseWriter, r *http.Request) {
 								if advancedDeleter != nil {
 									advancedDeleter.BeforeDelete(tag[1], evt.PubKey)
 								}
-
+								fmt.Printf("Delete Tag: %s\n", tag[1])
 								if err := store.DeleteEvent(tag[1], evt.PubKey); err != nil {
 									ws.WriteJSON([]interface{}{"OK", evt.ID, false, fmt.Sprintf("error: %s", err.Error())})
 									return
@@ -267,12 +267,17 @@ func (s *Server) handleWebsocket(w http.ResponseWriter, r *http.Request) {
 							notice = "failed to decode auth event: " + err.Error()
 							return
 						}
+
 						if pubkey, ok := nip42.ValidateAuthEvent(&evt, ws.challenge, auther.ServiceURL()); ok {
-							ws.authed = pubkey
-							ws.WriteJSON([]interface{}{"OK", evt.ID, true, "authentication success"})
-						} else {
-							ws.WriteJSON([]interface{}{"OK", evt.ID, false, "error: failed to authenticate"})
+							allow, ok := s.allowList[pubkey]
+							if ok && allow {
+								ws.authed = pubkey
+								ws.WriteJSON([]interface{}{"OK", evt.ID, true, "authentication success"})
+								break
+							}
 						}
+
+						ws.WriteJSON([]interface{}{"OK", evt.ID, false, "error: failed to authenticate"})
 					}
 				default:
 					if cwh, ok := s.relay.(CustomWebSocketHandler); ok {

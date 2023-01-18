@@ -39,6 +39,10 @@ type Injector interface {
 	InjectEvents() chan nostr.Event
 }
 
+type Allowlister interface {
+	Allowlist() []string
+}
+
 // Informationer is called to compose NIP-11 response to an HTTP request
 // with application/nostr+json mime type.
 // See also [Relay.Name].

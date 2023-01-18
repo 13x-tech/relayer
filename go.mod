@@ -2,6 +2,8 @@ module github.com/fiatjaf/relayer
 
 go 1.18
 
+replace github.com/nbd-wtf/go-nostr => ../go-nostr
+
 require (
 	github.com/PuerkitoBio/goquery v1.8.0
 	github.com/cockroachdb/pebble v0.0.0-20220723153705-3fc374e4dc66
