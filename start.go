@@ -63,8 +63,6 @@ type Server struct {
 	router     *mux.Router
 	httpServer *http.Server // set at Server.Start
 
-	allowList map[string]bool
-
 	// keep a connection reference to all connected clients for Server.Shutdown
 	clientsMu sync.Mutex
 	clients   map[*websocket.Conn]struct{}
@@ -74,12 +72,11 @@ type Server struct {
 // The provided address is used to listen and respond to HTTP requests.
 func NewServer(addr string, relay Relay) *Server {
 	srv := &Server{
-		Log:       defaultLogger(relay.Name() + ": "),
-		allowList: map[string]bool{},
-		addr:      addr,
-		relay:     relay,
-		router:    mux.NewRouter(),
-		clients:   make(map[*websocket.Conn]struct{}),
+		Log:     defaultLogger(relay.Name() + ": "),
+		addr:    addr,
+		relay:   relay,
+		router:  mux.NewRouter(),
+		clients: make(map[*websocket.Conn]struct{}),
 	}
 	srv.router.Path("/").Headers("Upgrade", "websocket").HandlerFunc(srv.handleWebsocket)
 	srv.router.Path("/").Headers("Accept", "application/nostr+json").HandlerFunc(srv.handleNIP11)
@@ -129,12 +126,6 @@ func (s *Server) Start() error {
 }
 
 func (s *Server) startListener(ln net.Listener) error {
-	if alw, ok := s.relay.(Allowlister); ok {
-		for _, allow := range alw.Allowlist() {
-			s.allowList[allow] = true
-		}
-	}
-
 	// init the relay
 	if err := s.relay.Init(); err != nil {
 		return fmt.Errorf("relay init: %w", err)
