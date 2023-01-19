@@ -269,15 +269,11 @@ func (s *Server) handleWebsocket(w http.ResponseWriter, r *http.Request) {
 						}
 
 						if pubkey, ok := nip42.ValidateAuthEvent(&evt, ws.challenge, auther.ServiceURL()); ok {
-							allow, ok := s.allowList[pubkey]
-							if ok && allow {
-								ws.authed = pubkey
-								ws.WriteJSON([]interface{}{"OK", evt.ID, true, "authentication success"})
-								break
-							}
+							ws.authed = pubkey
+							ws.WriteJSON([]interface{}{"OK", evt.ID, true, "authentication success"})
+						} else {
+							ws.WriteJSON([]interface{}{"OK", evt.ID, false, "error: failed to authenticate"})
 						}
-
-						ws.WriteJSON([]interface{}{"OK", evt.ID, false, "error: failed to authenticate"})
 					}
 				default:
 					if cwh, ok := s.relay.(CustomWebSocketHandler); ok {

@@ -117,6 +117,9 @@ func main() {
 	defaultWhitelist := []string{
 		"a9e5bff17ded4a4a3bf4de3ff7be295ca85678ac4f9dc647a1c3829f52e65299",
 		"6f3532cc79ffddad26d57d2420b70821ab2b0a8b605a3cb159520ccdbaee001c",
+		"061925ca6cb7f76c1bde1cffab20f18ba0201491e0f0481a6c235412e0d9b11e",
+		"72ddc066170a45bed7b406b680213bb4b9793728aee529498df7aaf2de280933",
+		"cb5962c411e1459abef037797ab53aa1710f3f26a4b437bfe883187ed8df1478",
 	}
 
 	defaultRelays := []string{
