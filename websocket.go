@@ -15,6 +15,10 @@ type WebSocket struct {
 	authed    string
 }
 
+func (s *WebSocket) Authed() string {
+	return s.authed
+}
+
 func (ws *WebSocket) WriteJSON(any interface{}) error {
 	ws.mutex.Lock()
 	defer ws.mutex.Unlock()

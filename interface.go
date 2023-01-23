@@ -26,6 +26,9 @@ type Relay interface {
 	// in NIP-20.
 	AcceptEvent(*nostr.Event) bool
 	// Storage returns the relay storage implementation.
+
+	//Triggerd when a REQ is recieved
+	RequestRecieved(ws *WebSocket, request []json.RawMessage) bool
 	Storage() Storage
 }
 
@@ -33,6 +36,10 @@ type Relay interface {
 // ServiceURL() returns the URL used to verify the "AUTH" event from clients.
 type Auther interface {
 	ServiceURL() string
+}
+
+type Requester interface {
+	RequestRecieved(ws *WebSocket, request []json.RawMessage) bool
 }
 
 type Injector interface {

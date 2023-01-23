@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -119,6 +120,7 @@ func (s *Server) handleWebsocket(w http.ResponseWriter, r *http.Request) {
 					// stop silently
 					return
 				}
+				log.Printf("Recieved: %s\n", request)
 
 				if len(request) < 2 {
 					notice = "request has less than 2 parameters"
@@ -178,6 +180,11 @@ func (s *Server) handleWebsocket(w http.ResponseWriter, r *http.Request) {
 					ws.WriteJSON([]interface{}{"OK", evt.ID, ok, message})
 
 				case "REQ":
+					if ok := s.relay.RequestRecieved(ws, request); !ok {
+						notice = "restricted: authenticated user does not have authorization for requested filters."
+						return
+					}
+
 					var id string
 					json.Unmarshal(request[1], &id)
 					if id == "" {

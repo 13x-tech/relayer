@@ -78,6 +78,7 @@ func NewServer(addr string, relay Relay) *Server {
 		router:  mux.NewRouter(),
 		clients: make(map[*websocket.Conn]struct{}),
 	}
+
 	srv.router.Path("/").Headers("Upgrade", "websocket").HandlerFunc(srv.handleWebsocket)
 	srv.router.Path("/").Headers("Accept", "application/nostr+json").HandlerFunc(srv.handleNIP11)
 	return srv
@@ -126,12 +127,14 @@ func (s *Server) Start() error {
 }
 
 func (s *Server) startListener(ln net.Listener) error {
+	// init the storage
+	if err := s.relay.Storage().Init(); err != nil {
+		return fmt.Errorf("storage init: %w", err)
+	}
+
 	// init the relay
 	if err := s.relay.Init(); err != nil {
 		return fmt.Errorf("relay init: %w", err)
-	}
-	if err := s.relay.Storage().Init(); err != nil {
-		return fmt.Errorf("storage init: %w", err)
 	}
 
 	// push events from implementations, if any

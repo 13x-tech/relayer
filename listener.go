@@ -1,6 +1,7 @@
 package relayer
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/nbd-wtf/go-nostr"
@@ -97,6 +98,7 @@ func notifyListeners(event *nostr.Event) {
 	}()
 
 	for ws, subs := range listeners {
+		fmt.Printf("Subs: %d\n", len(subs))
 		for id, listener := range subs {
 			if !listener.filters.Match(event) {
 				continue

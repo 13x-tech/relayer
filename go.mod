@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/PuerkitoBio/goquery v1.8.0
+	github.com/btcsuite/btcd/btcutil v1.1.1
 	github.com/cockroachdb/pebble v0.0.0-20220723153705-3fc374e4dc66
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.4.2
@@ -29,7 +30,6 @@ require (
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/btcsuite/btcd v0.23.1 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.2.0 // indirect
-	github.com/btcsuite/btcd/btcutil v1.1.1 // indirect
 	github.com/btcsuite/btcd/btcutil/psbt v1.1.4 // indirect
 	github.com/btcsuite/btcd/chaincfg/chainhash v1.0.1 // indirect
 	github.com/btcsuite/btclog v0.0.0-20170628155309-84c8d2346e9f // indirect
