@@ -322,7 +322,7 @@ func (s *Server) handleNIP11(w http.ResponseWriter, r *http.Request) {
 
 	info := nip11.RelayInformationDocument{
 		Name:          s.relay.Name(),
-		Description:   "Newstr Relay - News straight to you",
+		Description:   "Newstr Relay - News straight to you \nPay this invoice for access each month:\n LNURL1DP68GURN8GHJ7MR9VAJKUEPWD3HXY6T5WVHXXMMD9AKXUATJD3CZ7JJTTFQKY4QWT8J97",
 		PubKey:        "npub148jmlutaa49y5wl5mcll003ftj59v79vf7wuv3apcwpf75hx22vs7kk9ay",
 		Contact:       "info@13x.tech",
 		SupportedNIPs: supportedNIPs,
