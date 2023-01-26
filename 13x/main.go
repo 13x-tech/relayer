@@ -215,17 +215,17 @@ func (r *Relay) AcceptEvent(evt *nostr.Event) bool {
 
 func (r *Relay) advertisePayEvent(ws *relayer.WebSocket, request []json.RawMessage) {
 
-	var id string
-	json.Unmarshal(request[1], &id)
+	// var id string
+	// json.Unmarshal(request[1], &id)
 
-	event := nostr.Event{
-		ID:        "1",
-		PubKey:    "12345",
-		CreatedAt: time.Now(),
-		Kind:      22241,
-		Content:   `<a href="lightning:LNURL1DP68GURN8GHJ7MR9VAJKUEPWD3HXY6T5WVHXXMMD9AKXUATJD3CZ7JJTTFQKY4QWT8J97"> LNURL Pay </a>`,
-	}
-	ws.WriteJSON([]interface{}{"EVENT", id, event})
+	// event := nostr.Event{
+	// 	ID:        "1",
+	// 	PubKey:    "12345",
+	// 	CreatedAt: time.Now(),
+	// 	Kind:      22241,
+	// 	Content:   `<a href="lightning:LNURL1DP68GURN8GHJ7MR9VAJKUEPWD3HXY6T5WVHXXMMD9AKXUATJD3CZ7JJTTFQKY4QWT8J97"> LNURL Pay </a>`,
+	// }
+	// ws.WriteJSON([]interface{}{"EVENT", id, event})
 
 }
 
