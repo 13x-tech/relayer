@@ -12,7 +12,6 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/nbd-wtf/go-nostr"
-	"github.com/nbd-wtf/go-nostr/nip11"
 	"github.com/nbd-wtf/go-nostr/nip42"
 	"golang.org/x/exp/slices"
 )
@@ -320,17 +319,13 @@ func (s *Server) handleNIP11(w http.ResponseWriter, r *http.Request) {
 		supportedNIPs = append(supportedNIPs, 42)
 	}
 
-	info := nip11.RelayInformationDocument{
-		Name:          s.relay.Name(),
-		Description:   "Newstr Relay - News straight to you \nPay this invoice for access each month:\n LNURL1DP68GURN8GHJ7MR9VAJKUEPWD3HXY6T5WVHXXMMD9AKXUATJD3CZ7JJTTFQKY4QWT8J97",
-		PubKey:        "npub148jmlutaa49y5wl5mcll003ftj59v79vf7wuv3apcwpf75hx22vs7kk9ay",
-		Contact:       "info@13x.tech",
-		SupportedNIPs: supportedNIPs,
-	}
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"name":           s.relay.Name(),
+		"description":    "Newstr Relay - News straight to you",
+		"pubkey":         "npub148jmlutaa49y5wl5mcll003ftj59v79vf7wuv3apcwpf75hx22vs7kk9ay",
+		"lnurlp":         "LNURL1DP68GURN8GHJ7MR9VAJKUEPWD3HXY6T5WVHXXMMD9AKXUATJD3CZ7JJTTFQKY4QWT8J97",
+		"contact":        "info@13x.tech",
+		"supported_nips": supportedNIPs,
+	})
 
-	if ifmer, ok := s.relay.(Informationer); ok {
-		info = ifmer.GetNIP11InformationDocument()
-	}
-
-	json.NewEncoder(w).Encode(info)
 }
