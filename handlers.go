@@ -322,12 +322,10 @@ func (s *Server) handleNIP11(w http.ResponseWriter, r *http.Request) {
 
 	info := nip11.RelayInformationDocument{
 		Name:          s.relay.Name(),
-		Description:   "relay powered by the relayer framework",
-		PubKey:        "~",
-		Contact:       "~",
+		Description:   "Newstr Relay - News straight to you",
+		PubKey:        "npub148jmlutaa49y5wl5mcll003ftj59v79vf7wuv3apcwpf75hx22vs7kk9ay",
+		Contact:       "info@13x.tech",
 		SupportedNIPs: supportedNIPs,
-		Software:      "https://github.com/fiatjaf/relayer",
-		Version:       "~",
 	}
 
 	if ifmer, ok := s.relay.(Informationer); ok {
