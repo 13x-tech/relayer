@@ -39,7 +39,7 @@ type Relay struct {
 }
 
 func (r *Relay) Name() string {
-	return "13xRelayer"
+	return "Newstr"
 }
 
 func (r *Relay) MaxSize() int {

@@ -199,7 +199,6 @@ func (s *Server) writeCatResponse(rw http.ResponseWriter, ok bool, fileId, error
 
 func (s *Server) setCORSHeaders(rw http.ResponseWriter) {
 	fmt.Printf("Check Origin %s\n", s.OriginUrl)
-	rw.Header().Set("Access-Control-Allow-Headers", strings.Join(allowedHeaders, ","))
 	if s.OriginUrl == "" {
 		rw.Header().Set("Access-Control-Allow-Headers", "*")
 		rw.Header().Set("Access-Control-Allow-Origin", "*")
