@@ -87,7 +87,7 @@ func (s *Relay) handlePayment(w http.ResponseWriter, r *http.Request) {
 
 	defer w.WriteHeader(200)
 
-	if body.Amount >= 10000000 {
+	if body.Amount >= 2500*1000 {
 		//Parse Comment NPUb into HexPubKey
 
 		hrp, pubkey, err := nip19.Decode(body.Comment)
