@@ -27,6 +27,7 @@ type Relay struct {
 	WSURL  string   `envconfig:"SERVICE_URL"`
 	MSize  string   `envconfig:"MAX_SIZE"`
 	Relays []string `envconfig:"RELAYS"`
+	LNURLP string   `envconfig:"LNURLP"`
 
 	PostgresDatabase string `envconfig:"POSTGRESQL_DATABASE"`
 
@@ -53,6 +54,10 @@ func (r *Relay) MaxSize() int {
 
 func (r *Relay) Storage() relayer.Storage {
 	return r.storage
+}
+
+func (r *Relay) PayURL() string {
+	return r.LNURLP
 }
 
 func (r *Relay) ServiceURL() string {

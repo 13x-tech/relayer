@@ -319,16 +319,23 @@ func (s *Server) handleNIP11(w http.ResponseWriter, r *http.Request) {
 		supportedNIPs = append(supportedNIPs, 42)
 	}
 
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"name":        s.relay.Name(),
-		"description": "Newstr Relay - News straight to you",
-		"pubkey":      "npub148jmlutaa49y5wl5mcll003ftj59v79vf7wuv3apcwpf75hx22vs7kk9ay",
-		"payment": map[string]interface{}{
-			"lnurlp":      "LNURL1DP68GURN8GHJ7MR9VAJKUEPWD3HXY6T5WVHXXMMD9AKXUATJD3CZ7JJTTFQKY4QWT8J97",
-			"description": "Pay For 1 Month Access",
-		},
+	results := map[string]interface{}{
+		"name":           s.relay.Name(),
+		"description":    "Newstr Relay - News straight to you",
+		"pubkey":         "npub148jmlutaa49y5wl5mcll003ftj59v79vf7wuv3apcwpf75hx22vs7kk9ay",
 		"contact":        "info@13x.tech",
 		"supported_nips": supportedNIPs,
-	})
+	}
+
+	if receiver, ok := s.relay.(LNURLPayReceiver); ok {
+		if len(receiver.PayURL()) > 0 {
+			results["payment"] = map[string]interface{}{
+				"lnurlp":      receiver.PayURL(),
+				"description": "Pay For 1 Month Access",
+			}
+		}
+	}
+
+	json.NewEncoder(w).Encode(results)
 
 }

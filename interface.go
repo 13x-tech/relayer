@@ -66,6 +66,10 @@ type ShutdownAware interface {
 	OnShutdown(context.Context)
 }
 
+type LNURLPayReceiver interface {
+	PayURL() string
+}
+
 // Logger is what [Server] uses to log messages.
 type Logger interface {
 	Infof(format string, v ...any)
