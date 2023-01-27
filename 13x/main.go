@@ -60,6 +60,10 @@ func (r *Relay) PayURL() string {
 	return r.LNURLP
 }
 
+func (r *Relay) PayDescription() string {
+	return "Pay for 6 months access."
+}
+
 func (r *Relay) ServiceURL() string {
 	return r.WSURL
 }

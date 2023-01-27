@@ -179,9 +179,11 @@ func (s *Server) handleWebsocket(w http.ResponseWriter, r *http.Request) {
 					ws.WriteJSON([]interface{}{"OK", evt.ID, ok, message})
 
 				case "REQ":
-					if ok := s.relay.RequestRecieved(ws, request); !ok {
-						notice = "restricted: authenticated user does not have authorization for requested filters."
-						return
+					if req, ok := s.relay.(Requester); ok {
+						if ok := req.RequestRecieved(ws, request); !ok {
+							notice = "restricted: authenticated user does not have authorization for requested filters."
+							return
+						}
 					}
 
 					var id string
@@ -319,6 +321,10 @@ func (s *Server) handleNIP11(w http.ResponseWriter, r *http.Request) {
 		supportedNIPs = append(supportedNIPs, 42)
 	}
 
+	if _, ok := s.relay.(LNURLPayReceiver); ok {
+		supportedNIPs = append(supportedNIPs, 42069)
+	}
+
 	results := map[string]interface{}{
 		"name":           s.relay.Name(),
 		"description":    "Newstr Relay - News straight to you",
@@ -331,7 +337,7 @@ func (s *Server) handleNIP11(w http.ResponseWriter, r *http.Request) {
 		if len(receiver.PayURL()) > 0 {
 			results["payment"] = map[string]interface{}{
 				"lnurlp":      receiver.PayURL(),
-				"description": "Pay For 1 Month Access",
+				"description": receiver.PayDescription(),
 			}
 		}
 	}

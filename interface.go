@@ -27,8 +27,6 @@ type Relay interface {
 	AcceptEvent(*nostr.Event) bool
 	// Storage returns the relay storage implementation.
 
-	//Triggerd when a REQ is recieved
-	RequestRecieved(ws *WebSocket, request []json.RawMessage) bool
 	Storage() Storage
 }
 
@@ -38,6 +36,7 @@ type Auther interface {
 	ServiceURL() string
 }
 
+//Triggerd when a REQ is recieved
 type Requester interface {
 	RequestRecieved(ws *WebSocket, request []json.RawMessage) bool
 }
@@ -68,6 +67,7 @@ type ShutdownAware interface {
 
 type LNURLPayReceiver interface {
 	PayURL() string
+	PayDescription() string
 }
 
 // Logger is what [Server] uses to log messages.
