@@ -70,7 +70,6 @@ type LNURLHookBody struct {
 }
 
 func (s *Relay) handlePayment(w http.ResponseWriter, r *http.Request) {
-	log.Printf("Payment Hook recieved\n")
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("could not read body: %s\n", err)
@@ -84,6 +83,7 @@ func (s *Relay) handlePayment(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(500)
 		return
 	}
+	log.Printf("Payment Hook recieved: %s\n", body.Comment)
 
 	defer w.WriteHeader(200)
 
