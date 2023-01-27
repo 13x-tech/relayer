@@ -70,6 +70,7 @@ type LNURLHookBody struct {
 }
 
 func (s *Relay) handlePayment(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Payment Hook recieved\n")
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("could not read body: %s\n", err)
@@ -104,6 +105,7 @@ func (s *Relay) handlePayment(w http.ResponseWriter, r *http.Request) {
 			log.Printf("pubkey is less than 32 bytes: %d\n", len(pubkey.(string)))
 			return
 		}
+		log.Printf("Adding %s\n", body.Comment)
 
 		if err := s.InsertAllowed(pubkey.(string)); err != nil {
 			log.Printf("could not insert into allow list: %s\n", err)
