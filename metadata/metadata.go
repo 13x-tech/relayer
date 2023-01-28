@@ -120,6 +120,7 @@ func FetchMetaData(url string) (*MetaData, error) {
 		return nil, err
 	}
 	fmt.Printf("content lengt: %d\n", res.ContentLength)
+	fmt.Printf("content type: %s\n", res.Header.Get("content-type"))
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
