@@ -117,7 +117,38 @@ func fixURL(url string) string {
 
 func FetchMetaData(url string) (*MetaData, error) {
 
+	url = fixURL(url)
+
 	r, err := http.NewRequest(
+		http.MethodHead,
+		url,
+		bytes.NewReader([]byte{}),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	r.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36")
+	r.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;")
+	r.Header.Set("Accept-Language", "en-US,en;q=0.5")
+	r.Header.Set("Cache-Control", "max-age=0")
+
+	res, err := http.DefaultClient.Do(r)
+	if err != nil {
+		return nil, err
+	}
+
+	contentTyp := res.Header.Get("content-type")
+	switch true {
+	case strings.Contains(contentTyp, "text/html"):
+	case strings.Contains(contentTyp, "application/xhtml+xml"):
+	case strings.Contains(contentTyp, "application/xml"):
+		break
+	default:
+		return nil, fmt.Errorf("invalid format")
+	}
+
+	r, err = http.NewRequest(
 		http.MethodGet,
 		fixURL(url),
 		bytes.NewReader([]byte{}),
@@ -132,15 +163,11 @@ func FetchMetaData(url string) (*MetaData, error) {
 	r.Header.Set("Accept-Language", "en-US,en;q=0.5")
 	r.Header.Set("Cache-Control", "max-age=0")
 
-	res, err := http.DefaultClient.Do(r)
+	res, err = http.DefaultClient.Do(r)
 	if err != nil {
 		return nil, err
 	}
 
-	//TODO HEAD first
-	if !strings.Contains(res.Header.Get("content-type"), "text/html") {
-		return nil, fmt.Errorf("invalid format")
-	}
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {

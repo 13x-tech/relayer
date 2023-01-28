@@ -28,6 +28,8 @@ type Relay struct {
 	updates     chan nostr.Event
 	lastEmitted sync.Map
 	db          *pebble.DB
+	mdMu        sync.RWMutex
+	mdCache     map[string]*metadata.MetaData
 }
 
 func (relay *Relay) Name() string {
@@ -42,7 +44,7 @@ func errJson(msg string) []byte {
 	return errJson
 }
 
-func (r *Relay) OnInitialized(s *relayer.Server) {
+func (relay *Relay) OnInitialized(s *relayer.Server) {
 	s.Router().PathPrefix("/og/").Methods(http.MethodGet).HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		rw.Header().Add("content-type", "application/json")
 
@@ -55,7 +57,18 @@ func (r *Relay) OnInitialized(s *relayer.Server) {
 		}(r)
 
 		extractedURL := strings.TrimLeft(r.URL.Path, "/og/")
-		data, err := metadata.FetchMetaData(extractedURL)
+		relay.mdMu.RLock()
+		data, ok := relay.mdCache[extractedURL]
+		relay.mdMu.RUnlock()
+		if ok {
+			dataJson, _ := json.Marshal(data)
+			rw.WriteHeader(200)
+			rw.Write(dataJson)
+			return
+		}
+
+		var err error
+		data, err = metadata.FetchMetaData(extractedURL)
 		if err != nil {
 			if strings.Contains(err.Error(), "status code 404 error") {
 				rw.WriteHeader(http.StatusNotFound)
@@ -69,6 +82,20 @@ func (r *Relay) OnInitialized(s *relayer.Server) {
 		}
 
 		dataJson, _ := json.Marshal(data)
+
+		go func(url string) {
+
+			relay.mdMu.Lock()
+			relay.mdCache[extractedURL] = data
+			relay.mdMu.Unlock()
+
+			<-time.After(5 * time.Minute)
+			relay.mdMu.Lock()
+			delete(relay.mdCache, url)
+			relay.mdMu.Unlock()
+
+		}(extractedURL)
+
 		rw.WriteHeader(200)
 		rw.Write(dataJson)
 	})
@@ -85,6 +112,8 @@ func (relay *Relay) Init() error {
 	} else {
 		relay.db = db
 	}
+
+	relay.mdCache = map[string]*metadata.MetaData{}
 
 	// 2023/01/28 04:44:24 saved feed at url "https://www.theguardian.com/us/rss" as pubkey f1440f5f94651828133f5f8f307efc2eb6053f218b546bd924595beb67c1ab9f
 	// 2023/01/28 04:44:24 saved feed at url "https://www.newyorker.com/feed/posts" as pubkey 6f1658f90a18b042655c381e79ef673f91888128766a6f95f41db42a3de84db6
