@@ -116,7 +116,7 @@ func fixURL(url string) string {
 }
 
 func FetchMetaData(url string) (*MetaData, error) {
-
+	fmt.Printf("Fetch Metadata: %s\n", url)
 	url = fixURL(url)
 
 	r, err := http.NewRequest(
@@ -137,6 +137,7 @@ func FetchMetaData(url string) (*MetaData, error) {
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("Got HEAD: %s\n", url)
 
 	contentTyp := res.Header.Get("content-type")
 	switch true {
@@ -167,6 +168,7 @@ func FetchMetaData(url string) (*MetaData, error) {
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("Got Get: %s\n", url)
 
 	defer res.Body.Close()
 
