@@ -5,11 +5,15 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
+	"net/url"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/cockroachdb/pebble"
 	"github.com/fiatjaf/relayer"
+	"github.com/fiatjaf/relayer/metadata"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/nbd-wtf/go-nostr"
 	"golang.org/x/exp/slices"
@@ -32,6 +36,35 @@ func (relay *Relay) Name() string {
 }
 
 func (r *Relay) OnInitialized(s *relayer.Server) {
+	s.Router().Path("/og/").Methods(http.MethodGet).HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		extractedURL := strings.TrimLeft(r.URL.Path, "/og/")
+		u, err := url.Parse(extractedURL)
+		if err != nil {
+			msg := fmt.Sprintf("could not parse url %s: %s", extractedURL, err.Error())
+			log.Println(msg)
+			errJson, _ := json.Marshal(map[string]interface{}{
+				"error": msg,
+			})
+			rw.WriteHeader(400)
+			rw.Write(errJson)
+			return
+		}
+		data, err := metadata.FetchMetaData(u.String())
+		if err != nil {
+			msg := fmt.Sprintf("could not fetch metadata %s: %s", extractedURL, err.Error())
+			log.Println(msg)
+			errJson, _ := json.Marshal(map[string]interface{}{
+				"error": msg,
+			})
+			rw.WriteHeader(400)
+			rw.Write(errJson)
+			return
+		}
+
+		dataJson, _ := json.Marshal(data)
+		rw.WriteHeader(200)
+		rw.Write(dataJson)
+	})
 }
 
 func (relay *Relay) Init() error {
