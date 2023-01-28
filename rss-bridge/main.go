@@ -45,10 +45,23 @@ func errJson(msg string) []byte {
 func (r *Relay) OnInitialized(s *relayer.Server) {
 	s.Router().PathPrefix("/og/").Methods(http.MethodGet).HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		rw.Header().Add("content-type", "application/json")
-		fmt.Printf("OG Triggered: %s", r.URL.Path)
+
+		go func(r *http.Request) {
+			jsonReq, err := json.Marshal(r)
+			if err != nil {
+				log.Printf("[OG Triggered]: %s\n\t{}\n", r.URL.String())
+			}
+			log.Printf("[OG Triggered]: %s\n\t%s\n", r.URL.String(), string(jsonReq))
+		}(r)
+
 		extractedURL := strings.TrimLeft(r.URL.Path, "/og/")
 		data, err := metadata.FetchMetaData(extractedURL)
 		if err != nil {
+			if strings.Contains(err.Error(), "status code 404 error") {
+				rw.WriteHeader(http.StatusNotFound)
+				rw.Write([]byte(http.StatusText(http.StatusNotFound)))
+				return
+			}
 			msg := fmt.Sprintf("could not fetch metadata %s: %s", extractedURL, err.Error())
 			rw.WriteHeader(400)
 			rw.Write(errJson(msg))
