@@ -36,7 +36,7 @@ func (relay *Relay) Name() string {
 }
 
 func (r *Relay) OnInitialized(s *relayer.Server) {
-	s.Router().Path("/og/*").Methods(http.MethodGet).HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+	s.Router().Path("/og/").Methods(http.MethodGet).HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		extractedURL := strings.TrimLeft(r.URL.Path, "/og/")
 		u, err := url.Parse(extractedURL)
 		if err != nil {
