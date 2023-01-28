@@ -119,6 +119,12 @@ func FetchMetaData(url string) (*MetaData, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	//TODO HEAD first
+	if !strings.Contains(res.Header.Get("content-type"), "text/html") {
+		return nil, fmt.Errorf("invalid format")
+	}
+
 	fmt.Printf("content lengt: %d\n", res.ContentLength)
 	fmt.Printf("content type: %s\n", res.Header.Get("content-type"))
 	defer res.Body.Close()
