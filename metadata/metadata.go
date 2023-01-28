@@ -116,7 +116,6 @@ func fixURL(url string) string {
 }
 
 func FetchMetaData(url string) (*MetaData, error) {
-	fmt.Printf("Fetch Metadata: %s\n", url)
 	url = fixURL(url)
 
 	r, err := http.NewRequest(
@@ -128,16 +127,10 @@ func FetchMetaData(url string) (*MetaData, error) {
 		return nil, err
 	}
 
-	r.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36")
-	r.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;")
-	r.Header.Set("Accept-Language", "en-US,en;q=0.5")
-	r.Header.Set("Cache-Control", "max-age=0")
-
 	res, err := http.DefaultClient.Do(r)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("Got HEAD: %s\n", url)
 
 	contentTyp := res.Header.Get("content-type")
 	switch true {
@@ -158,17 +151,10 @@ func FetchMetaData(url string) (*MetaData, error) {
 		return nil, err
 	}
 
-	r.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36")
-	r.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
-	r.Header.Set("Accept-Encoding", "gzip, deflate, br")
-	r.Header.Set("Accept-Language", "en-US,en;q=0.5")
-	r.Header.Set("Cache-Control", "max-age=0")
-
 	res, err = http.DefaultClient.Do(r)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("Got Get: %s\n", url)
 
 	defer res.Body.Close()
 
@@ -180,8 +166,6 @@ func FetchMetaData(url string) (*MetaData, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Printf("Got Doc For %s: %d nodes", url, len(doc.Nodes))
 
 	metaData := &MetaData{}
 	metaData.URL = getMetaTag(doc, "og:url", getCanonicalLink(doc))
