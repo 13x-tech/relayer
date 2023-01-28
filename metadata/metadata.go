@@ -99,8 +99,23 @@ func getMeta(doc *goquery.Document, attribute, tag, defaultVal string) string {
 	return defaultVal
 }
 
+func fixURL(url string) string {
+	if !strings.HasPrefix(url, "http://") || !strings.HasPrefix(url, "https://") {
+		return url
+	}
+
+	if strings.HasPrefix(url, "http:/") {
+		return strings.Replace(url, "http:/", "http://", 1)
+	}
+
+	if strings.HasPrefix(url, "https:/") {
+		return strings.Replace(url, "https:/", "https://", 1)
+	}
+	return url
+}
+
 func FetchMetaData(url string) (*MetaData, error) {
-	res, err := http.Get(url)
+	res, err := http.Get(fixURL(url))
 	if err != nil {
 		return nil, err
 	}

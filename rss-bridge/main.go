@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/url"
 	"strings"
 	"sync"
 	"time"
@@ -47,19 +46,7 @@ func (r *Relay) OnInitialized(s *relayer.Server) {
 	s.Router().PathPrefix("/og/").Methods(http.MethodGet).HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		fmt.Printf("OG Triggered: %s", r.URL.Path)
 		extractedURL := strings.TrimLeft(r.URL.Path, "/og/")
-		if len(extractedURL) == 0 {
-			rw.WriteHeader(400)
-			rw.Write(errJson("no url"))
-			return
-		}
-		u, err := url.Parse(extractedURL)
-		if err != nil {
-			msg := fmt.Sprintf("could not parse url %s: %s", extractedURL, err.Error())
-			rw.WriteHeader(400)
-			rw.Write(errJson(msg))
-			return
-		}
-		data, err := metadata.FetchMetaData(u.String())
+		data, err := metadata.FetchMetaData(extractedURL)
 		if err != nil {
 			msg := fmt.Sprintf("could not fetch metadata %s: %s", extractedURL, err.Error())
 			rw.WriteHeader(400)
