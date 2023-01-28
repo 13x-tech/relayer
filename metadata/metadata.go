@@ -11,9 +11,9 @@ import (
 )
 
 type ImageInfo struct {
-	Height int    `mata:"og:image:height" json:"height"`
-	Width  int    `meta:"og:image:width" json:"width"`
-	Alt    string `meta:"og:image:alt" json:"alt"`
+	Height int    `mata:"og:image:height" json:"height,omitempty"`
+	Width  int    `meta:"og:image:width" json:"width,omitempty"`
+	Alt    string `meta:"og:image:alt" json:"alt,omitempty"`
 	URL    string `meta:"og:image" json:"url"`
 }
 
@@ -27,8 +27,8 @@ func getImageMeta(doc *goquery.Document) ImageInfo {
 }
 
 type VideoInfo struct {
-	Height int    `mata:"og:image:height" json:"height"`
-	Width  int    `meta:"og:image:width" json:"width"`
+	Height int    `mata:"og:image:height" json:"height,omitempty"`
+	Width  int    `meta:"og:image:width" json:"width,omitempty"`
 	URL    string `meta:"og:image" json:"url"`
 }
 
@@ -41,12 +41,12 @@ func getVideoMeta(doc *goquery.Document) VideoInfo {
 }
 
 type ArticleMeta struct {
-	Author        string    `meta:"article:author" json:"author"`
-	Publisher     string    `meta:"article:publisher" json:"publisher"`
-	Section       string    `meta:"article:section" json:"section"`
-	PublishedTime time.Time `meta:"article:published_time" json:"published"`
-	ModifiedTime  time.Time `meta:"article:modified_time" json:"modified"`
-	Tags          []string  `meta:"article:tag" json:"tags"`
+	Author        string    `meta:"article:author" json:"author,omitempty"`
+	Publisher     string    `meta:"article:publisher" json:"publisher,omitempty"`
+	Section       string    `meta:"article:section" json:"section,omitempty"`
+	PublishedTime time.Time `meta:"article:published_time" json:"published,omitempty"`
+	ModifiedTime  time.Time `meta:"article:modified_time" json:"modified,omitempty"`
+	Tags          []string  `meta:"article:tag" json:"tags,omitempty"`
 }
 
 func getArticleMeta(doc *goquery.Document) ArticleMeta {
@@ -70,12 +70,12 @@ func getTimeMeta(doc *goquery.Document, tag string) (time.Time, error) {
 
 // MetaData holds the relevant meta data for a page
 type MetaData struct {
-	Title       string      `json:"title"`
-	Description string      `json:"description"`
-	URL         string      `json:"url"`
+	Title       string      `json:"title,omitempty"`
+	Description string      `json:"description,omitempty"`
+	URL         string      `json:"url,omitempty"`
 	Image       ImageInfo   `json:"image,omitempty"`
 	Video       VideoInfo   `json:"video,omitempty"`
-	Keywords    []string    `json:"keywords"`
+	Keywords    []string    `json:"keywords,omitempty"`
 	Article     ArticleMeta `json:"articleMeta,omitempty"`
 }
 
