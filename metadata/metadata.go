@@ -100,7 +100,7 @@ func getMeta(doc *goquery.Document, attribute, tag, defaultVal string) string {
 }
 
 func fixURL(url string) string {
-	if !strings.HasPrefix(url, "http://") || !strings.HasPrefix(url, "https://") {
+	if strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://") {
 		return url
 	}
 
