@@ -44,6 +44,7 @@ func errJson(msg string) []byte {
 
 func (r *Relay) OnInitialized(s *relayer.Server) {
 	s.Router().PathPrefix("/og/").Methods(http.MethodGet).HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		rw.Header().Add("content-type", "application/json")
 		fmt.Printf("OG Triggered: %s", r.URL.Path)
 		extractedURL := strings.TrimLeft(r.URL.Path, "/og/")
 		data, err := metadata.FetchMetaData(extractedURL)
