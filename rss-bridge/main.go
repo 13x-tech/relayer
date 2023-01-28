@@ -45,6 +45,7 @@ func errJson(msg string) []byte {
 
 func (r *Relay) OnInitialized(s *relayer.Server) {
 	s.Router().Path("/og/").Methods(http.MethodGet).HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		fmt.Printf("OG Triggered: %s", r.URL.Path)
 		extractedURL := strings.TrimLeft(r.URL.Path, "/og/")
 		if len(extractedURL) == 0 {
 			rw.WriteHeader(400)
