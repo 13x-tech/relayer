@@ -233,7 +233,6 @@ func (s *Server) handleWebsocket(w http.ResponseWriter, r *http.Request) {
 						if advancedQuerier != nil {
 							advancedQuerier.BeforeQuery(filter)
 						}
-
 						events, err := store.QueryEvents(filter)
 						if err != nil {
 							s.Log.Errorf("store: %v", err)

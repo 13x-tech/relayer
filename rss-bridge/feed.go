@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
@@ -11,9 +12,9 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/nbd-wtf/go-nostr"
 	strip "github.com/grokify/html-strip-tags-go"
 	"github.com/mmcdole/gofeed"
+	"github.com/nbd-wtf/go-nostr"
 	"github.com/rif/cache2go"
 )
 
@@ -28,6 +29,7 @@ var (
 type Entity struct {
 	PrivateKey string
 	URL        string
+	Meta       Metadata
 }
 
 var types = []string{
@@ -39,7 +41,15 @@ var types = []string{
 }
 
 func getFeedURL(url string) string {
-	resp, err := client.Get(url)
+	r, err := http.NewRequest(http.MethodGet, url, bytes.NewReader([]byte{}))
+	if err != nil {
+		return ""
+	}
+	// r.Header.Add("content-type", "text/xml;charset=UTF-8,application/rss+xml")
+	r.Header.Add("content-type", "text/xml;charset=UTF-8")
+	// r.Header.Add("content-type", "application/rss+xml")
+
+	resp, err := client.Do(r)
 	if err != nil || resp.StatusCode >= 300 {
 		return ""
 	}
@@ -91,14 +101,15 @@ func parseFeed(url string) (*gofeed.Feed, error) {
 	return feed, nil
 }
 
-func feedToSetMetadata(pubkey string, feed *gofeed.Feed) nostr.Event {
+func feedToSetMetadata(pubkey string, feed *gofeed.Feed, meta Metadata) nostr.Event {
 	metadata := map[string]string{
-		"name":  feed.Title,
-		"about": feed.Description + "\n\n" + feed.Link,
+		"name":    meta.Name,
+		"about":   fmt.Sprintf("%s\n-----\nurl: %s\n\n%s\n", feed.Description, feed.Link, "Brought to you by Newstr.io"),
+		"picture": meta.Picture,
+		"banner":  meta.Banner,
+		"nip05":   meta.Nip05,
 	}
-	if feed.Image != nil {
-		metadata["picture"] = feed.Image.URL
-	}
+
 	content, _ := json.Marshal(metadata)
 
 	createdAt := time.Now()
