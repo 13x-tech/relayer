@@ -35,29 +35,33 @@ func (relay *Relay) Name() string {
 	return "relayer-rss-bridge"
 }
 
+func errJson(msg string) []byte {
+	log.Println(msg)
+	errJson, _ := json.Marshal(map[string]interface{}{
+		"error": msg,
+	})
+	return errJson
+}
+
 func (r *Relay) OnInitialized(s *relayer.Server) {
 	s.Router().Path("/og/").Methods(http.MethodGet).HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		extractedURL := strings.TrimLeft(r.URL.Path, "/og/")
+		if len(extractedURL) == 0 {
+			rw.WriteHeader(400)
+			rw.Write(errJson("no url"))
+		}
 		u, err := url.Parse(extractedURL)
 		if err != nil {
 			msg := fmt.Sprintf("could not parse url %s: %s", extractedURL, err.Error())
-			log.Println(msg)
-			errJson, _ := json.Marshal(map[string]interface{}{
-				"error": msg,
-			})
 			rw.WriteHeader(400)
-			rw.Write(errJson)
+			rw.Write(errJson(msg))
 			return
 		}
 		data, err := metadata.FetchMetaData(u.String())
 		if err != nil {
 			msg := fmt.Sprintf("could not fetch metadata %s: %s", extractedURL, err.Error())
-			log.Println(msg)
-			errJson, _ := json.Marshal(map[string]interface{}{
-				"error": msg,
-			})
 			rw.WriteHeader(400)
-			rw.Write(errJson)
+			rw.Write(errJson(msg))
 			return
 		}
 
