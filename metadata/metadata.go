@@ -181,6 +181,8 @@ func FetchMetaData(url string) (*MetaData, error) {
 		return nil, err
 	}
 
+	fmt.Printf("Got Doc For %s: %d nodes", url, len(doc.Nodes))
+
 	metaData := &MetaData{}
 	metaData.URL = getMetaTag(doc, "og:url", getCanonicalLink(doc))
 	metaData.Title = getMetaTag(doc, "og:title", doc.Find("head title").First().Text())
