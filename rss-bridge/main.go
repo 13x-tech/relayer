@@ -60,7 +60,7 @@ func (relay *Relay) OnInitialized(s *relayer.Server) {
 		relay.mdMu.RLock()
 		data, ok := relay.mdCache[extractedURL]
 		relay.mdMu.RUnlock()
-		if ok {
+		if ok && data != nil {
 			dataJson, _ := json.Marshal(data)
 			rw.WriteHeader(200)
 			rw.Write(dataJson)
@@ -82,22 +82,22 @@ func (relay *Relay) OnInitialized(s *relayer.Server) {
 		}
 
 		dataJson, _ := json.Marshal(data)
+		rw.WriteHeader(200)
+		rw.Write(dataJson)
 
-		go func(url string) {
+		go func(url string, data *metadata.MetaData) {
 
 			relay.mdMu.Lock()
 			relay.mdCache[extractedURL] = data
 			relay.mdMu.Unlock()
 
-			<-time.After(5 * time.Minute)
+			<-time.After(10 * time.Minute)
 			relay.mdMu.Lock()
 			delete(relay.mdCache, url)
 			relay.mdMu.Unlock()
 
-		}(extractedURL)
+		}(extractedURL, data)
 
-		rw.WriteHeader(200)
-		rw.Write(dataJson)
 	})
 }
 
