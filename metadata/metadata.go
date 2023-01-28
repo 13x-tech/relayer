@@ -1,6 +1,7 @@
 package metadata
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -115,7 +116,18 @@ func fixURL(url string) string {
 }
 
 func FetchMetaData(url string) (*MetaData, error) {
-	res, err := http.Get(fixURL(url))
+
+	r, err := http.NewRequest(
+		http.MethodGet,
+		fixURL(url),
+		bytes.NewReader([]byte{}),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Printf("!!!!!!!! Headers: %s !!!!!\n\n", r.Header)
+	res, err := http.DefaultClient.Do(r)
 	if err != nil {
 		return nil, err
 	}
