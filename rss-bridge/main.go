@@ -123,6 +123,8 @@ func (relay *Relay) OnInitialized(s *relayer.Server) {
 			return
 		}
 
+		fmt.Printf("[POW] Difficulty Expected: %d\n", difficulty)
+
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			msg := fmt.Sprintf("could not read body: %s", err.Error())
@@ -138,16 +140,18 @@ func (relay *Relay) OnInitialized(s *relayer.Server) {
 			rw.Write(errJson("could not unmarshal event json", msg))
 			return
 		}
+		fmt.Printf("[POW] Event PubKey: %s\n", e.PubKey)
 
-		e, err = nip13.Generate(e, difficulty, 5*time.Minute)
+		nEvent, err := nip13.Generate(e, difficulty, 5*time.Minute)
 		if err != nil {
 			msg := fmt.Sprintf("could not generate nonce: %s", err.Error())
 			rw.WriteHeader(400)
 			rw.Write(errJson(msg, msg))
 			return
 		}
+		fmt.Printf("[POW] FOUND NONCE!!: %s\n", nEvent.Tags)
 
-		eventJson, err := json.Marshal(e)
+		eventJson, err := json.Marshal(nEvent)
 		if err != nil {
 			msg := fmt.Sprintf("could not marshal event json: %s", err.Error())
 			rw.WriteHeader(400)
@@ -155,7 +159,7 @@ func (relay *Relay) OnInitialized(s *relayer.Server) {
 			return
 		}
 
-		log.Printf("!!!!!!!![FOUND POW]!!!!!")
+		log.Printf("!!!!!!!![RETURNED POW]!!!!!")
 
 		rw.WriteHeader(200)
 		rw.Write(eventJson)
