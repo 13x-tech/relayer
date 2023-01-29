@@ -155,6 +155,8 @@ func (relay *Relay) OnInitialized(s *relayer.Server) {
 			return
 		}
 
+		log.Printf("!!!!!!!![FOUND POW]!!!!!")
+
 		rw.WriteHeader(200)
 		rw.Write(eventJson)
 	})
