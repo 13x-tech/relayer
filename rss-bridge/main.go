@@ -15,9 +15,9 @@ import (
 	"github.com/cockroachdb/pebble"
 	"github.com/fiatjaf/relayer"
 	"github.com/fiatjaf/relayer/metadata"
+	"github.com/fiatjaf/relayer/rss-bridge/nip13"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/nbd-wtf/go-nostr"
-	"github.com/nbd-wtf/go-nostr/nip13"
 	"golang.org/x/exp/slices"
 )
 
