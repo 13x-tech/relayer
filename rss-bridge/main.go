@@ -149,7 +149,7 @@ func (relay *Relay) OnInitialized(s *relayer.Server) {
 			rw.Write(errJson(msg, msg))
 			return
 		}
-		fmt.Printf("[POW] FOUND NONCE!!: %s\n", nEvent.Tags)
+		fmt.Printf("[POW] FOUND NONCE!!: %s -  %s\n", nEvent.ID, nEvent.Tags)
 
 		eventJson, err := json.Marshal(nEvent)
 		if err != nil {
