@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -15,6 +17,7 @@ import (
 	"github.com/fiatjaf/relayer/metadata"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/nbd-wtf/go-nostr"
+	"github.com/nbd-wtf/go-nostr/nip13"
 	"golang.org/x/exp/slices"
 )
 
@@ -36,7 +39,7 @@ func (relay *Relay) Name() string {
 	return "relayer-rss-bridge"
 }
 
-func errJson(msg string) []byte {
+func errJson(msg string, logMessage string) []byte {
 	log.Println(msg)
 	errJson, _ := json.Marshal(map[string]interface{}{
 		"error": msg,
@@ -45,6 +48,7 @@ func errJson(msg string) []byte {
 }
 
 func (relay *Relay) OnInitialized(s *relayer.Server) {
+
 	s.Router().PathPrefix("/og/").Methods(http.MethodGet).HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		rw.Header().Add("content-type", "application/json")
 
@@ -77,7 +81,7 @@ func (relay *Relay) OnInitialized(s *relayer.Server) {
 			}
 			msg := fmt.Sprintf("could not fetch metadata %s: %s", extractedURL, err.Error())
 			rw.WriteHeader(400)
-			rw.Write(errJson(msg))
+			rw.Write(errJson("could nt fetch metadata", msg))
 			return
 		}
 
@@ -97,7 +101,62 @@ func (relay *Relay) OnInitialized(s *relayer.Server) {
 			relay.mdMu.Unlock()
 
 		}(extractedURL, data)
+	})
 
+	s.Router().PathPrefix("/pow/").Methods(http.MethodPost).HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		rw.Header().Add("content-type", "application/json")
+
+		go func(r *http.Request) {
+			jsonReq, err := json.Marshal(r)
+			if err != nil {
+				log.Printf("[POW Triggered]: %s\n\t{}\n", r.URL.String())
+			}
+			log.Printf("[POW Triggered]: %s\n\t%s\n", r.URL.String(), string(jsonReq))
+		}(r)
+
+		extractedDifficulty := strings.Trim(strings.TrimLeft(r.URL.Path, "/pow/"), "/")
+		difficulty, err := strconv.Atoi(extractedDifficulty)
+		if err != nil {
+			msg := fmt.Sprintf("could parse difficulty: %s", err.Error())
+			rw.WriteHeader(400)
+			rw.Write(errJson(fmt.Sprintf("could not parse difficulty: %s", extractedDifficulty), msg))
+			return
+		}
+
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			msg := fmt.Sprintf("could not read body: %s", err.Error())
+			rw.WriteHeader(400)
+			rw.Write(errJson("could not read body", msg))
+			return
+		}
+
+		e := &nostr.Event{}
+		if err := json.Unmarshal(body, e); err != nil {
+			msg := fmt.Sprintf("could not unmarshal event json: %s", err.Error())
+			rw.WriteHeader(400)
+			rw.Write(errJson("could not unmarshal event json", msg))
+			return
+		}
+
+		e, err = nip13.Generate(e, difficulty, 5*time.Minute)
+		if err != nil {
+			msg := fmt.Sprintf("could not generate nonce: %s", err.Error())
+			rw.WriteHeader(400)
+			rw.Write(errJson(msg, msg))
+			return
+		}
+
+		eventJson, err := json.Marshal(e)
+		if err != nil {
+			msg := fmt.Sprintf("could not marshal event json: %s", err.Error())
+			rw.WriteHeader(400)
+			rw.Write(errJson("could not marshal event json", msg))
+			return
+		}
+
+		rw.WriteHeader(200)
+		rw.Write(eventJson)
 	})
 }
 
