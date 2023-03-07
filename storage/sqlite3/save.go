@@ -2,20 +2,44 @@ package sqlite3
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/fiatjaf/relayer/storage"
 	"github.com/nbd-wtf/go-nostr"
 )
 
 func (b *SQLite3Backend) SaveEvent(evt *nostr.Event) error {
+
+	//if newer event already exists for specified kinds, return error
+	if evt.Kind == nostr.KindSetMetadata || evt.Kind == nostr.KindContactList || (10000 <= evt.Kind && evt.Kind < 20000) {
+		rows, err := b.DB.Query(`SELECT id FROM event WHERE pubkey = $1 AND kind = $2 AND created_at > $3`,
+			evt.PubKey, evt.Kind, evt.CreatedAt.Unix())
+		if err != nil {
+			return err
+		}
+		if rows.Next() {
+			return fmt.Errorf("newer event exists")
+		}
+	} else if evt.Kind == nostr.KindRecommendServer {
+		rows, err := b.DB.Query(`SELECT id FROM event WHERE pubkey = $1 AND kind = $2 AND content = $3 AND created_at > $4`,
+			evt.PubKey, evt.Kind, evt.Content, evt.CreatedAt.Unix())
+		if err != nil {
+			return err
+		}
+		if rows.Next() {
+			return fmt.Errorf("newer event exists")
+		}
+	}
+
 	// react to different kinds of events
 	if evt.Kind == nostr.KindSetMetadata || evt.Kind == nostr.KindContactList || (10000 <= evt.Kind && evt.Kind < 20000) {
 		// delete past events from this user
-		b.DB.Exec(`DELETE FROM event WHERE pubkey = $1 AND kind = $2`, evt.PubKey, evt.Kind)
+		b.DB.Exec(`DELETE FROM event WHERE pubkey = $1 AND kind = $2 AND created_at < $3`,
+			evt.PubKey, evt.Kind, evt.CreatedAt.Unix())
 	} else if evt.Kind == nostr.KindRecommendServer {
 		// delete past recommend_server events equal to this one
-		b.DB.Exec(`DELETE FROM event WHERE pubkey = $1 AND kind = $2 AND content = $3`,
-			evt.PubKey, evt.Kind, evt.Content)
+		b.DB.Exec(`DELETE FROM event WHERE pubkey = $1 AND kind = $2 AND content = $3 AND created_at < $4`,
+			evt.PubKey, evt.Kind, evt.Content, evt.CreatedAt.Unix())
 	}
 
 	// insert
